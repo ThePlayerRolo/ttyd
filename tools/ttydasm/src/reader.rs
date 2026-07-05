@@ -2,7 +2,7 @@ use std::fmt;
 
 use anyhow::Context as _;
 use hashbrown::HashMap;
-use object::{File, Object as _, ObjectSection as _, ObjectSymbol as _, SectionKind};
+use object::{File, Object as _, ObjectSection as _, ObjectSymbol as _};
 
 use crate::opcode::Opcode;
 
@@ -134,7 +134,7 @@ impl<'a> EventScript<'a> {
             };
 
             let section = self.file.section_by_index(section_index)?;
-            if section.kind() != SectionKind::ReadOnlyData {
+            if ![".rodata", ".sdata2"].contains(&section.name()?) {
                 return Ok(Arg::Symbol { name: name.to_string() });
             }
 
@@ -148,12 +148,7 @@ impl<'a> EventScript<'a> {
             }
         } else {
             match category {
-                ExpressionType::Address => {
-                    let name =
-                        self.lookup.get(&offset).context("Unable to get relocation for index {raw}")?;
-                    Ok(Arg::Symbol { name: name.to_string() })
-                }
-                ExpressionType::Pointer => {
+                ExpressionType::Address | ExpressionType::Pointer => {
                     let name =
                         self.lookup.get(&offset).context("Unable to get relocation for index {raw}")?;
                     Ok(Arg::Symbol { name: name.to_string() })
@@ -208,9 +203,6 @@ impl<'a> EventScript<'a> {
     }
 
     pub fn extract(&mut self, symbol: &str) -> anyhow::Result<()> {
-        // TODO: I forgot to add nesting for the relevant commands, and also I need to emit
-        // STRING() if I resolve a symbol. I also need to not emit parentheses on the handful of
-        // tags we have
         let mut indentation = 1;
         println!("EVT_BEGIN({})", symbol);
         while self.remaining() >= 4 {

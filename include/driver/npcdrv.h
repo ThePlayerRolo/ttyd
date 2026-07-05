@@ -35,9 +35,10 @@ typedef struct BattleGroupSetup {
 typedef struct NpcBattleInfo {
     u8 field_0[0x4 - 0x0];          // 0x0
     s32 field_4;                    // 0x4
-    u8 field_8[0x10 - 0x8];         // 0x8
-    s32 heartsDroppedBaseCount;     // 0x10
-    s32 flowersDroppedBaseCount;    // 0x14
+    u8 field_8[0xC - 0x8];          // 0x8
+    ItemType itemDropped;           // 0xC
+    s32 heartsDropped;              // 0x10
+    s32 flowersDropped;             // 0x14
     BattleGroupSetup* groupSetup;   // 0x18
     ItemType heldItems[8];          // 0x1C
     ItemDropData* itemDropLists[8]; // 0x3C

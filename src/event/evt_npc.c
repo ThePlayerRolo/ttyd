@@ -927,17 +927,59 @@ USER_FUNC(evt_npc_flag_onoff) {
     return EVT_RETURN_DONE;
 }
 
+USER_FUNC(evt_npc_get_drop_fixitem) {
+}
+
+USER_FUNC(evt_npc_get_drop_item) {
+    s32* args = event->args;
+    const char* npcName = (const char*)evtGetValue(event, *args++);
+    NpcEntry* npc = evtNpcNameToPtr(event, npcName);
+    s32 index = *args++;
+
+    if (npc->battleInfo.field_4 & 8) {
+        evtSetValue(event, index, 0);
+    } else {
+        evtSetValue(event, index, npc->battleInfo.itemDropped);
+    }
+    return 2;
+}
+
+USER_FUNC(evt_npc_get_drop_heart) {
+    s32* args = event->args;
+    const char* npcName = (const char*)evtGetValue(event, *args++);
+    NpcEntry* npc = evtNpcNameToPtr(event, npcName);
+    s32 index = *args++;
+
+    if (npc->battleInfo.field_4 & 2) {
+        evtSetValue(event, index, 0);
+    } else {
+        s32 count = pouchEquipCheckBadge(ITEM_HEART_FINDER);
+        s32 heartsDropped = npc->battleInfo.heartsDropped;
+
+        if (count > 0) {
+            if (count == 1) {
+                heartsDropped += irand(3) + 1;
+            } else {
+                heartsDropped += irand(count + 3) + 1;
+            }
+        }
+
+        evtSetValue(event, index, heartsDropped);
+    }
+    return EVT_RETURN_DONE;
+}
+
 USER_FUNC(evt_npc_get_drop_flower) {
     s32* args = event->args;
-    const char* npcName = (const char*)evtGetValue(event, *args);
+    const char* npcName = (const char*)evtGetValue(event, *args++);
     NpcEntry* npc = evtNpcNameToPtr(event, npcName);
-    s32 index = args[1];
-	
+    s32 index = *args++;
+
     if (npc->battleInfo.field_4 & 4) {
         evtSetValue(event, index, 0);
     } else {
         s32 count = pouchEquipCheckBadge(ITEM_FLOWER_FINDER);
-        s32 flowersDropped = npc->battleInfo.flowersDroppedBaseCount;
+        s32 flowersDropped = npc->battleInfo.flowersDropped;
 
         if (count > 0) {
             if (count == 1) {
@@ -1139,7 +1181,7 @@ USER_FUNC(evt_npc_majo_disp_on) {
             animPosePaperPeraOn(npc->poseId);
             animPoseSetLocalTime(npc->poseId, 0.0f);
             event->userdata[0]++;
-            psndSFXOn_3D(0x275, &npc->position);
+            psndSFXOn_3D((char*)0x275, &npc->position);
             break;
 
         default:
@@ -1156,13 +1198,13 @@ USER_FUNC(evt_npc_majo_disp_on) {
                     case 0:
                         break;
                     case 1:
-                        psndSFXOn_3D(0x937, &npc->position);
+                        psndSFXOn_3D((char*)0x937, &npc->position);
                         break;
                     case 2:
-                        psndSFXOn_3D(0x27B, &npc->position);
+                        psndSFXOn_3D((char*)0x27B, &npc->position);
                         break;
                     case 3:
-                        psndSFXOn_3D(0x278, &npc->position);
+                        psndSFXOn_3D((char*)0x278, &npc->position);
                         break;
                 }
             }
@@ -1201,7 +1243,7 @@ USER_FUNC(evt_npc_majo_disp_off) {
     if (isFirstCall) {
         event->userdata[0] = 0;
         event->userdata[1] = 0;
-        psndSFXOn_3D(0x275, &npc->position);
+        psndSFXOn_3D((char*)0x275, &npc->position);
     }
 
     if (!animGroupBaseAsync("p_bibi", group, NULL)) {
@@ -1219,13 +1261,13 @@ USER_FUNC(evt_npc_majo_disp_off) {
                     case 0:
                         break;
                     case 1:
-                        psndSFXOn_3D(0x936, &npc->position);
+                        psndSFXOn_3D((char*)0x936, &npc->position);
                         break;
                     case 2:
-                        psndSFXOn_3D(0x27A, &npc->position);
+                        psndSFXOn_3D((char*)0x27A, &npc->position);
                         break;
                     case 3:
-                        psndSFXOn_3D(0x277, &npc->position);
+                        psndSFXOn_3D((char*)0x277, &npc->position);
                         break;
                 }
             }
